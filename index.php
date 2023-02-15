@@ -19,7 +19,8 @@ if(empty($_SESSION['logged_in'])) {
     <input type="text" name="fullname" placeholder="Enter full name." id=""><br>
     <input type="text" name="username" placeholder="Enter username." id=""><br>
     <input type="password" name="password" placeholder="Enter password." id=""><br>
-    <button type="submit">Submit</button>
+    <button type="button" onclick="promptPassword();">Submit</button>
+    <button id="submitBtn" type="submit" style="display:none">Submit</button>
 </form>
 
 <hr>
@@ -27,7 +28,7 @@ if(empty($_SESSION['logged_in'])) {
 <?php require_once "connection.php"; ?>
 
 <form action="search.php">
-    <input type="search" name="q" id="" placeholder="Enter name to search.."/>
+    <input onkeyup="searchAjax();" type="search" name="q" id="search" placeholder="Enter name to search.."/>
     <button type="submit">Search</button>
 </form>
 <form action="./process/delete-selected.php" method="post">
@@ -45,7 +46,7 @@ if(empty($_SESSION['logged_in'])) {
         <th>Action</th>
         </tr>
     </thead>
-    <tbody>
+    <tbody id="tbody">
     <?php
         $sql = "SELECT * FROM user";
 
@@ -68,7 +69,7 @@ if(empty($_SESSION['logged_in'])) {
             <td><?php echo $row['username']; ?></td>
             <td><?php echo $row['password']; ?></td>
             <td>
-                <a href="./process/delete.php?id=<?php echo $row['id']; ?>">Delete</a>
+                <a href="./process/delete.php?id=<?php echo $row['id']; ?>&img=<?php echo $row['photo']; ?>">Delete</a>
                 |<a href="./edit.php?id=<?php echo $row['id']; ?>">Edit</a>
             </td>
             </tr>
@@ -92,7 +93,7 @@ if(empty($_SESSION['logged_in'])) {
     </tbody>
 </table>
 </form>
-
+<script src="sweetalert.min.js"></script>
 <script>
 file.onchange = (e) => {
     let imageData = e.target.files[0];
@@ -113,5 +114,41 @@ checkall.onchange = () => {
 
 function chooseImage() {
     file.click();
+}
+
+async function promptPassword() {
+    let userInput = await swal({
+        text: 'Enter a valid password to insert data: ',
+        content: "input",
+        button: {
+            text: "Submit",
+            closeModal: false,
+        },
+    });
+
+    if(userInput) {
+        let response = await fetch("./process/prompt-password.php?password=" + userInput);
+        let data = await response.json();
+    
+        console.log(data);
+        if(data.status == 'success') {
+            swal("Congrats! " + data.message);
+            submitBtn.click();
+        } else {
+            swal("Whahaha! " + data.message);
+        }
+        
+    } else {
+        swal("No text entered");
+    }
+}
+
+
+async function searchAjax() {
+    let userInput = search.value;
+    let response = await fetch("./process/ajax-search.php?q=" + userInput);
+    let data = await response.text();
+
+    tbody.innerHTML = data;
 }
 </script>

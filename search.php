@@ -12,18 +12,28 @@
     <tbody>
     <?php
         $q = $_GET['q'];
-        $sql = "SELECT * FROM names WHERE last_name LIKE '%$q%' OR first_name LIKE '%$q%'";
+        $sql = "SELECT * FROM user WHERE fullname LIKE '%$q%'";
 
         $result = $conn->query($sql);
 
         if ($result->num_rows > 0) {
             while($row = $result->fetch_assoc()) {?>
             <tr>
+            <td style="text-align: center">
+                <input type="checkbox" 
+                    value="<?php echo $row['id']; ?>" 
+                    name="checked[]" id=""
+                />
+            </td>
             <td><?php echo $row['id']; ?></td>
-            <td><?php echo $row['last_name']; ?></td>
-            <td><?php echo $row['first_name']; ?></td>
             <td>
-                <a href="./process/delete.php?id=<?php echo $row['id']; ?>">Delete</a>
+                <img style="height: 75px;" src="./process/uploads/<?php echo $row['photo']; ?>" alt="">
+            </td>
+            <td><?php echo $row['fullname']; ?></td>
+            <td><?php echo $row['username']; ?></td>
+            <td><?php echo $row['password']; ?></td>
+            <td>
+                <a href="./process/delete.php?id=<?php echo $row['id']; ?>&img=<?php echo $row['photo']; ?>">Delete</a>
                 |<a href="./edit.php?id=<?php echo $row['id']; ?>">Edit</a>
             </td>
             </tr>
